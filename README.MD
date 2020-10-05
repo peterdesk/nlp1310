@@ -124,7 +124,7 @@ https://wikidocs.net/4307
 
 #### 강사: 고병화
 #### E-mail : digicope@aicore.co.kr
-#### git 주소 :    https://github.com/digicope/nlp1209
+#### git 주소 :    https://github.com/digicope/nlp1310
 #### (git 사용기간 : 2020.10.05  ~ 2020.11.02 , 이후에는 접속 불가)
 
 <br>
