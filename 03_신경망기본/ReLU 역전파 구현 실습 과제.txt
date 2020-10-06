@@ -1,0 +1,27 @@
+[실습 과제]  : ReLU 역전파 구현 실습
+
+nn_layers.py 모듈에 class ReLU를 만들어 순전파(forward)와 역전파(backward) 메서드를
+추가로 구현하고 신경망학습 소스를 수정하여  ReLU class를 추가 import 시키고 
+Sigmoid 계층 대신에 ReLU를 사용하는 2층 신경망 학습 코드를 구현하세요
+(hidden_size = 100으로 변경하여 구현해 보세요)
+
+[힌트] 
+
+# 신경망 학습 코드에서 계층 생성
+self.layers = [
+    Affine(W1, b1),
+    ReLU(),
+    Affine(W2, b2),
+]
+
+# ReLU 함수식과 미분
+ReLU : y = x   ( x > 0 )
+       y = 0   (x <= 0)
+
+ReLU 함수 미분:   
+         dy/dx  = 1   ( x > 0 )
+         dy/dx  = 0   ( x <= 0 )  
+
+ReLU 순전파 :  X가 0 이하일 경우 0으로 변경하여 출력 , 배열의 불린인덱스를 사용하여 구현한다
+ReLU 역전파 :  X가 0 이하일 경우 0으로 변경하여 출력 , 배열의 불린인덱스를 사용하여 구현한다
+
