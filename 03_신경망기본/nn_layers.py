@@ -8,64 +8,64 @@
 
 import numpy as np
 
-# 순전파
+# # 순전파
 
-D = 8
-N = 7
-x = np.random.rand(1,D)  # (1,8)
-# x = np.random.rand(D,).reshape(1,-1)  # (1,8)
-print(x,x.shape)
-print('-'*70)
+# D = 8
+# N = 7
+# x = np.random.rand(1,D)  # (1,8)
+# # x = np.random.rand(D,).reshape(1,-1)  # (1,8)
+# print(x,x.shape)
+# print('-'*70)
 
-y = np.repeat(x,N,axis=0)  # 수직(행) 방향, axis=0
-print(y,y.shape)   # (7, 8)
-
-
-# In[15]:
+# y = np.repeat(x,N,axis=0)  # 수직(행) 방향, axis=0
+# print(y,y.shape)   # (7, 8)
 
 
-# 역전파 : sum
-dy = np.random.rand(N,D)
-print(dy,dy.shape)  # (7, 8)
-print('-'*70)
-dx = np.sum(dy,axis=0,keepdims=True)  # 수직방향 합, keepdims=True이면 2차원, False이면 1차원
-print(dx,dx.shape)  # (1,8)
+# # In[15]:
 
 
-# In[18]:
+# # 역전파 : sum
+# dy = np.random.rand(N,D)
+# print(dy,dy.shape)  # (7, 8)
+# print('-'*70)
+# dx = np.sum(dy,axis=0,keepdims=True)  # 수직방향 합, keepdims=True이면 2차원, False이면 1차원
+# print(dx,dx.shape)  # (1,8)
 
 
-a = np.array([[1,2,3,4]])
-np.sum(a, keepdims=True) # 2차원 유지
+# # In[18]:
 
 
-# ### Sum 노드
-
-# In[22]:
-
-
-# 순전파
-
-D,N = 8,7
-x = np.random.rand(N,D) 
-print(x,x.shape)  # (7,8)
-print('-'*70)
-
-y = np.sum(x,axis=0,keepdims=True)  # 수직방향 합, keepdims=True이면 2차원, False이면 1차원
-print(y,y.shape)
+# a = np.array([[1,2,3,4]])
+# np.sum(a, keepdims=True) # 2차원 유지
 
 
-# In[23]:
+# # ### Sum 노드
+
+# # In[22]:
 
 
-# 역전파
+# # 순전파
 
-dy = np.random.rand(1,D)  # (1,8)
-print(dy,dy.shape)
-print('-'*70)
+# D,N = 8,7
+# x = np.random.rand(N,D) 
+# print(x,x.shape)  # (7,8)
+# print('-'*70)
 
-dx = np.repeat(dy,N,axis=0)  # 수직(행) 방향, axis=0
-print(dx,dx.shape)   # (7, 8)
+# y = np.sum(x,axis=0,keepdims=True)  # 수직방향 합, keepdims=True이면 2차원, False이면 1차원
+# print(y,y.shape)
+
+
+# # In[23]:
+
+
+# # 역전파
+
+# dy = np.random.rand(1,D)  # (1,8)
+# print(dy,dy.shape)
+# print('-'*70)
+
+# dx = np.repeat(dy,N,axis=0)  # 수직(행) 방향, axis=0
+# print(dx,dx.shape)   # (7, 8)
 
 
 # ### MatMul 노드
@@ -96,33 +96,33 @@ class MatMul:
 # In[27]:
 
 
-a = np.array([1, 2, 3])
-b = np.array([4, 5, 6])
-print(hex(id(a)),hex(id(b)))
-a = b    # 얕은 복사
-print(a)
-print(hex(id(a)),hex(id(b)))
-id(a) == id(b)
+# a = np.array([1, 2, 3])
+# b = np.array([4, 5, 6])
+# print(hex(id(a)),hex(id(b)))
+# a = b    # 얕은 복사
+# print(a)
+# print(hex(id(a)),hex(id(b)))
+# id(a) == id(b)
 
 
 # In[28]:
 
 
-a = np.array([1, 2, 3])
-b = np.array([4, 5, 6])
-a[...] = b  # 깊은 복사
-print(a)
-print(hex(id(a)),hex(id(b)))
-id(a) == id(b)
+# a = np.array([1, 2, 3])
+# b = np.array([4, 5, 6])
+# a[...] = b  # 깊은 복사
+# print(a)
+# print(hex(id(a)),hex(id(b)))
+# id(a) == id(b)
 
 
 # In[31]:
 
 
-# np.zeros_like
-a = np.arange(12).reshape(3,4)
-b = np.zeros_like(a)
-b
+# # np.zeros_like
+# a = np.arange(12).reshape(3,4)
+# b = np.zeros_like(a)
+# b
 
 
 # ### 시그모이드 계층
@@ -237,16 +237,16 @@ class SotmaxWithLoss:
 # In[36]:
 
 
-# softmax 구현시에  지수값이 크면 오버플로발생으로 nan이 나오는 것을 방지하기 위해 입력 값의 촤대값을 빼주어 사용한다
-a = np.array([1010,1000,990])
-print(np.exp(a))    # [inf inf inf]  , 무한대 값, 오버플로우 발생
-x = np.exp(a)/np.sum(np.exp(a))
-print(x)  # [nan nan nan]
+# # softmax 구현시에  지수값이 크면 오버플로발생으로 nan이 나오는 것을 방지하기 위해 입력 값의 촤대값을 빼주어 사용한다
+# a = np.array([1010,1000,990])
+# print(np.exp(a))    # [inf inf inf]  , 무한대 값, 오버플로우 발생
+# x = np.exp(a)/np.sum(np.exp(a))
+# print(x)  # [nan nan nan]
 
-c = np.max(a)
-print(a - c)
-x2 = np.exp(a - c)/np.sum(np.exp(a - c))
-print(x2)  # [9.99954600e-01 4.53978686e-05 2.06106005e-09]
+# c = np.max(a)
+# print(a - c)
+# x2 = np.exp(a - c)/np.sum(np.exp(a - c))
+# print(x2)  # [9.99954600e-01 4.53978686e-05 2.06106005e-09]
 
 
 # ### 가중치 갱신
