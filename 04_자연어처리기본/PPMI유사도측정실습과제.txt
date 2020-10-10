@@ -1,0 +1,63 @@
+[실습 과제]  : PPMI의 차원축소(SVD) 및 WordNet 을 사용한 단어의 유사도 측정 
+
+[ 과제 1] : 차원축소(SVD)를 사용한 단어의 PPMI 유사도 측정 
+아래 문장에 사용된 단어를 PTB데이터셋을 PPMI 와 SVD 차원 축소 기법을 사용하여 만든 벡터에 넣어 각 단어들의 유사도를 측정하여 출력해보세요
+
+text = "The black cat ran so fast that the white mouse could not run away."
+
+주어진 text를 말뭉치로 변환한다
+마침표는 삭제한다
+유사도 출력 코드는 for 문을 사용하여 반복한다
+
+[힌트]
+(1)  PTB 데이터셋으로 PPMI를 얻는다 (기존 코드 재사용)
+(2) 얻어지 PPMI 행렬을 SVD를 수행하여 100개의 차원으로 축소한다(기존 코드 재사용)
+(3) text = 'The black cat ran so fast that the white mouse could not run away.' 문자열을 소문자로 변환하고
+    마침표는 삭제하고 단어리스트(말뭉치)를 생성한다
+(4) for문을 사용하여 단어리스트에 있는 각각 단어들을 most_similar()을 호출하여 유사도가 높은 상위 5개를  출력한다
+
+
+
+[ 과제 2] : WordNet 사용 단어의 유사도 측정
+WordNet을 사용한 경로 거리 기반 유사도 (Path Distance Similarity)값과 비교하여 보세요
+'black'과 'white'의 유사도와 'cat'과 'mouse'의 유사도만 다음 3개의 방법으로 비교해 본다
+  - 경로 거리 기반 유사도 (Path Distance Similarity)
+  - 우 팔머 유사도 (Wu-Palmer Similarity)
+  - 리콕 초도로우 유사도(Leacock Chordorow Similarity)
+
+[힌트]
+(1) 단어를 인자로 주면 wordnet  동의어에서 표제어를 아래 정규표현식으로 검출하여 반환해주는 함수를 구현한다
+def get_match(word) :
+	# r = r"black.n.01"
+	r = r"^(%s)+(.)([a-z]+)(.)(01)$"%word
+
+	...
+	return match.group()
+
+(2) 두개의 단어를 입력한면  get_match()함수를 호출하여 검출된 두 단어의 표제어로 유사도를  출력해주는 함수를 구현한다
+def get_wordnet_similarity(word1,word2):
+ 	...          
+	xxx = get_match(...)
+	...
+    	# 경로 유사도
+    	print('%s - %s [path] : %f'%(word1,word2, ...)
+	...
+    	 # Wu-Palmer Similarity
+    	print('%s - %s [wup] :'%(word1,word2),...)
+
+    	# Leacock Chordorow Similarity
+    	print('%s - %s [lch] :'%(word1,word2),...)   
+	...
+
+(3)  함수 호출   
+get_wordnet_similarity('black', 'white')
+get_wordnet_similarity('cat', 'mouse')
+[출력 결과
+--------------------------------------------------
+black - white [path] : 0.083333
+black - white [wup] : 0.15384615384615385
+black - white [lch] : 1.1526795099383855
+--------------------------------------------------
+cat - mouse [path] : 0.166667
+cat - mouse [wup] : 0.8148148148148148
+cat - mouse [lch] : 1.845826690498331
