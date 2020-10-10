@@ -1,0 +1,18 @@
+[실습 과제]  :  word2vec 신경망 모델 구현 실습
+
+[ 과제 1] : CBOW 신경망 모델 구현
+아래 문장을 사용하여 중간 단어를 예측하는  CBOW 신경망 모델 구현하여 학습 수행 후 예측값과 및 정확도를 구해보세요
+      text = "Sawyer also appears in at least three unfinished Twain works, \
+        Huck and Tom Among the Indians, Schoolhouse Hill and Tom Sawyer's Conspiracy.\
+        While all three uncompleted works were posthumously published, \
+        only Tom Sawyer's Conspiracy has a complete plot, as Twain abandoned \
+        the other two works after finishing only a few chapters."
+
+
+[ 과제 2] : SkipGram신경망 모델 구현
+아래 문장을 사용하여 주변 단어를 예측하는  SkipGram 신경망 모델 구현하여 학습 수행 후 예측값과 및 정확도를 구해보세요
+     text = "Sawyer also appears in at least three unfinished Twain works, \
+        Huck and Tom Among the Indians, Schoolhouse Hill and Tom Sawyer's Conspiracy.\
+        While all three uncompleted works were posthumously published, \
+        only Tom Sawyer's Conspiracy has a complete plot, as Twain abandoned \
+        the other two works after finishing only a few chapters."
