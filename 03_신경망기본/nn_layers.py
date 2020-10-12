@@ -153,7 +153,7 @@ class Sigmoid:
 class Affine:
     def __init__(self,W,b):
         self.params = [W,b]
-        self.grads = [np.zeros_like(W),np_zeros_like(b)]
+        self.grads = [np.zeros_like(W),np.zeros_like(b)]
         self.x = None
         
     def forward(self,x):
@@ -212,7 +212,7 @@ class SotmaxWithLoss:
     
     def forward(self, x, t):
         self.t = t
-        self.y = slef.softmax(x)
+        self.y = self.softmax(x)
 
         # 정답 레이블이 원핫 벡터일 경우 정답의 인덱스로 변환
         if self.t.size == self.y.size:
