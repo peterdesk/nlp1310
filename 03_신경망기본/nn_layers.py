@@ -80,7 +80,7 @@ class MatMul:
         self.x = None
         
     def forward(self,x):
-        W = self.params
+        W, = self.params
         out = np.dot(x,W)
         self.x = x
         return out
