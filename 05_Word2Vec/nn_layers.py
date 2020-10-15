@@ -86,7 +86,7 @@ class MatMul:
         return out
         
     def backward(self,dout):
-        W = self.params
+        W, = self.params
         dx = np.dot(dout,W.T)
         dw = np.dot(self.x.T,dout)
         self.grads[0][...] = dw  # 깊은복사
