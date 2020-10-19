@@ -546,7 +546,6 @@ class SigmoidWithLoss:
     
 
 # NegativeSamplingLoss 클래스
-# nn_layers.py 에 추가한다
 
 class NegativeSamplingLoss:
     def __init__(self,W,corpus,power=0.75,sample_size=5): #  sample_size : 부정 단어 샘플링 수 (2개)
