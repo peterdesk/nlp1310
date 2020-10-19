@@ -569,7 +569,7 @@ class NegativeSamplingLoss:
         loss = self.loss_layers[0].forward(score,correct_label)        
         
         # 부정단어 순전파
-        negative_label = np.zeros(batch_size,dtype-np.int32) # 값이 모두 0 : 부정 
+        negative_label = np.zeros(batch_size,dtype=np.int32) # 값이 모두 0 : 부정 
         
         for i in range(self.sample_size):
             negative_target = negative_sample[:,i]
