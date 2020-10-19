@@ -416,5 +416,177 @@ class Trainer:
         plt.ylabel('손실')
         plt.show()      
 
-            
 
+
+# Embedding 계층
+class Embedding :
+    def __init__(self, W):
+        self.params = [W]
+        self.grads = [np.zeros_like(W)]
+        self.idx = None
+    
+    # 순전파
+    def forward(self,idx):
+        W, = self.params
+        self.idx = idx
+        out = W[idx]
+        return out
+    
+    # 역전파
+    def backward(self, dout):  # 중복 인덱스가 있어도 올바르게 처리, 속도가 빠름
+        dW, = self.grads
+        dW[...] = 0
+        np.add.at(dW, self.idx, dout)  
+        return None       
+
+    
+# EmbeddingDot 계층
+
+class EmbeddingDot:
+    def __init__(self,W):
+        self.embed = Embedding(W)
+        self.params = self.embed.params
+        self.grads = self.embed.grads
+        self.cache = None
+        
+    def forward(self,h,idx):
+        target_W = self.embed.forward(idx)
+        out = np.sum(target_W*h,axis=1)   # 1차원 출력
+        self.cache = (h, target_W)
+        return out
+    
+    def backward(self, dout):
+        h, target_W = self.cache
+        dout = dout.reshape(dout.shape[0],1) # 2차원으로 변환
+        
+        dtarget_W = dout*h  # sum <--> repeat, 브로드캐스트
+        self.embed.backward(dtarget_W)
+        
+        dh = dout*target_W  # 브로드캐스트
+        return dh
+    
+
+
+# UnigramSampler
+
+import collections
+class UnigramSampler:    
+    # 생성자 : corpus를 사용하여 단어의 0.75제곱 처리한 확률 분포를 구함
+    def __init__(self, corpus, power, sample_size): # power= 0.75, sample_size = 2
+        self.sample_size = sample_size
+        self.vocab_size = None
+        self.word_p = None
+
+        # corpus 내의 단어별 발생횟수를 구함    
+        counts = collections.Counter()  
+        for word_id in corpus:   # corpus: [0 1 2 3 4 1 5 6], 
+            counts[word_id] += 1
+
+        vocab_size = len(counts)
+        self.vocab_size = vocab_size  # 7
+
+        self.word_p = np.zeros(vocab_size)  # (7,)
+        for i in range(vocab_size):  # 7 
+            self.word_p[i] = counts[i]  # [1, 2, 1, 1, 1, 1, 1] ,단어 발생 횟수
+
+        self.word_p = np.power(self.word_p, power) # 0.75제곱
+        self.word_p /= np.sum(self.word_p)  # 전체의 합으로 나누어 확률을 구함
+
+
+    def get_negative_sample(self, target):   # target = np.array([1, 3, 0]), (3,)
+        batch_size = target.shape[0]  # 3
+        
+        negative_sample = np.zeros((batch_size, self.sample_size), dtype=np.int32)  # (3,2)
+
+        for i in range(batch_size):  # 3회
+            p = self.word_p.copy()
+            target_idx = target[i]  # 1,3,0
+            p[target_idx] = 0  # p[1]=0,p[3]=0,p[0]=0 ,부정 단어로 target이 선택되지 않도록 확률 값을 0으로 설정 
+            p /= p.sum()
+            negative_sample[i, :] = np.random.choice(self.vocab_size, size=self.sample_size, replace=False, p=p)
+            
+        return negative_sample
+    
+
+# SigmoidWithLoss 클래스 사용 
+
+class SigmoidWithLoss:
+    def __init__(self):
+        self.params, self.grads = [], []
+        self.loss = None
+        self.y = None  # sigmoid의 출력
+        self.t = None  # 정답 데이터
+
+    def cross_entropy_error(self,y, t):   # softmax 와 동일
+        if y.ndim == 1:
+            t = t.reshape(1, t.size)
+            y = y.reshape(1, y.size)
+
+        # 정답 데이터가 원핫 벡터일 경우 정답 레이블 인덱스로 변환
+        if t.size == y.size:
+            t = t.argmax(axis=1)
+
+        batch_size = y.shape[0]
+
+        return -np.sum(np.log(y[np.arange(batch_size), t] + 1e-7)) / batch_size
+        
+    def forward(self, x, t):
+        self.t = t
+        self.y = 1 / (1 + np.exp(-x))   # sigmoid , 예측값
+
+        self.loss = self.cross_entropy_error(np.c_[1 - self.y, self.y], self.t)
+
+        return self.loss
+
+    def backward(self, dout=1):
+        batch_size = self.t.shape[0]
+
+        dx = (self.y - self.t) * dout / batch_size
+        return dx
+    
+
+# NegativeSamplingLoss 클래스
+# nn_layers.py 에 추가한다
+
+class NegativeSamplingLoss:
+    def __init__(self,W,corpus,power=0.75,sample_size=5): #  sample_size : 부정 단어 샘플링 수 (2개)
+        self.sample_size = sample_size
+        self.sampler = UnigramSampler(corpus,power,sample_size)
+        self.embed_dot_layers = [EmbeddingDot(W) for _ in range(sample_size + 1)] # 긍정 1개 + 부정 2개
+        self.loss_layers = [SigmoidWithLoss() for _ in range(sample_size + 1)]   # 긍정 1개 + 부정 2개
+        
+        self.params, self.grads = [],[]
+        for layer in self.embed_dot_layers:
+            self.params += layer.params
+            self.grads += layer.grads
+            
+    def forward(self,h,target) : # target은 긍정단어의 index
+        batch_size = target.shape[0]
+        negative_sample = self.sampler.get_negative_sample(target) # 부정 단어 샘플
+        
+        # 긍정단어 순전파
+        score = self.embed_dot_layers[0].forward(h,target)  # target-->index
+        correct_label = np.ones(batch_size, dtype=np.int32) # 값이 모두 1: 긍정
+        loss = self.loss_layers[0].forward(score,correct_label)        
+        
+        # 부정단어 순전파
+        negative_label = np.zeros(batch_size,dtype-np.int32) # 값이 모두 0 : 부정 
+        
+        for i in range(self.sample_size):
+            negative_target = negative_sample[:,i]
+            score = self.embed_dot_layers[i + 1].forward(h,negative_target)
+            loss += self.loss_layers[i + 1].forward(score,negative_label) # loss의 누적 합
+            
+        return loss
+     
+    def backward(self,dout=1)  : # 입력값을 각 계층의 backward만 호출하여 전달
+        dh = 0
+        for l0,l1 in zip(self.loss_layers, self.embed_dot_layers):  # 역전파이므로  los_layer가 먼저 호출된다
+            dscore = l0.backward(dout)   # SigmoidWithLoss 계층
+            dh += l1.backward(dscore)   # EmbeddingDot 계층   
+        return dh
+    
+    
+    
+    
+    
