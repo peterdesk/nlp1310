@@ -125,10 +125,12 @@ class MatMul:
 # b
 
 
+# sigmoid 함수
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+
 ### 시그모이드 계층
-
-# In[32]:
-
 
 class Sigmoid:
     def __init__(self):
