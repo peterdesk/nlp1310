@@ -1,0 +1,17 @@
+[ 실습 과제 ] : MemN_QA 학습 모델 구현
+              MemN_QA 학습 모델 한국어 판을 영어 데이터셋을 사용하여 구현해보세요
+              전처리 부분의 한글 형태소 분석기 사용을 영어에 맞도록 수정한다
+              학습 후 예측 코드를 수행하여 결과를 확인해본다
+
+* bAbi 영어 데이터 셋 가져오기 코드
+import tarfile
+path = get_file('babi-tasks-v1-2.tar.gz', origin='https://s3.amazonaws.com/text-datasets/'
+                'babi_tasks_1-20_v1-2.tar.gz')
+                
+with tarfile.open(path) as tar:
+    tar.extractall()
+    tar.close()
+
+DATA_DIR = 'tasks_1-20_v1-2/en-10k'
+TRAIN_FILE = os.path.join(DATA_DIR, "qa1_single-supporting-fact_train.txt")
+TEST_FILE = os.path.join(DATA_DIR, "qa1_single-supporting-fact_test.txt")                
