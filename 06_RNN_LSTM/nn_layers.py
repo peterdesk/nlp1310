@@ -207,7 +207,23 @@ def softmax(x):
         x = np.exp(x) / np.sum(np.exp(x))
 
     return x    
-    
+
+# Softmax 계층
+class Softmax:
+    def __init__(self):
+        self.params, self.grads = [], []
+        self.out = None
+
+    def forward(self, x):
+        self.out = softmax(x)
+        return self.out
+
+    def backward(self, dout):
+        dx = self.out * dout
+        sumdx = np.sum(dx, axis=1, keepdims=True)
+        dx -= self.out * sumdx
+        return dx
+
 # ## Softmax with Loss 계층
 
 # In[35]:
@@ -1191,6 +1207,70 @@ class TimeDropout:
     def backward(self, dout):
         return dout * self.mask  
     
+# Encoder class
+class Encoder:
+    def __init__(self,vocab_size, wordvec_size,hidden_size ):
+        V,D,H = vocab_size, wordvec_size,hidden_size
+        rn = np.random.randn
+        
+        # 가중치 초기화
+        embed_W = (rn(V,D) / 100).astype('f')       
+        lstm_Wx = (rn(D,4*H) / np.sqrt(D)).astype('f') 
+        lstm_Wh = (rn(H,4*H) / np.sqrt(H)).astype('f') 
+        lstm_b = np.zeros(4*H).astype('f')             
+        
+        # 계층 생성
+        self.embed = TimeEmbedding(embed_W)
+        self.lstm = TimeLSTM(lstm_Wx,lstm_Wh,lstm_b,stateful=False)
+        
+        # 모든 가중치와 기울기를 모은다.
+        self.params = self.embed.params + self.lstm.params
+        self.grads = self.embed.grads + self.lstm.grads
+
+    def forward(self,xs):
+        xs = self.embed.forward(xs)
+        hs = self.lstm.forward(xs)    # [N,T,H] , 3차원
+        self.hs = hs
+        return hs[:,-1,:]             # TimeLSTM 계층의 마지막 은닉 상태 h를 반환, [N,H], 2차원
     
+    def backward(self,dh):
+        dhs = np.zeros_like(self.hs)
+        dhs[:,-1,:] = dh
+        
+        dout = self.lstm.backward(dhs)
+        dout = self.embed.backward(dout)
+        return dout   
+    
+class Seq2seq:
+    def __init__(self, vocab_size, wordvec_size, hidden_size):
+        V,D,H = vocab_size, wordvec_size, hidden_size
+        
+        self.encoder = Encoder(V,D,H)
+        self.decoder = Decoder(V,D,H)
+        self.softmax = TimeSoftmaxWithLoss()
+        
+        self.params = self.encoder.params + self.decoder.params
+        self.grads = self.encoder.grads + self.decoder.grads
+        
+    def forward(self,xs,ts):
+        decoder_xs, decoder_ts = ts[:,:-1], ts[:,1:] # decoder의 입력: 마지막 단어를 제외
+                                                     # softmaxwithloss 의 입력 : 첫 단어를 제외
+        
+        h = self.encoder.forward(xs)
+        score = self.decoder.forward(decoder_xs,h)
+        loss = self.softmax.forward(score,decoder_ts)
+        return loss
+    
+    def backward(self,dout=1):
+        dout = self.softmax.backward(dout)
+        dh = self.decoder.backward(dout)
+        dout = self.encoder.backward(dh)
+        return dout
+    
+    def generate(self,xs, start_id, sample_size):
+        h = self.encoder.forward(xs)
+        sampled = self.decoder.generate(h,start_id,sample_size)
+        
+        return sampled    
     
     
