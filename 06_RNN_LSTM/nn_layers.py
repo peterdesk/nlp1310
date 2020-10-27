@@ -1277,6 +1277,7 @@ class Seq2seq:
 # Q 77+85  
 # T 162 
 # O 162 
+import os
 def eval_seq2seq(model, question, correct, id_to_char,
                  verbos=False, is_reverse=False):
     correct = correct.flatten()
